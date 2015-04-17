@@ -1,0 +1,46 @@
+version: 1.0.0.{build}
+
+install:
+  - cinst pester
+
+build_script:
+  - ps: |
+      function Write-Info([string]$message) {
+        Write-Host -ForegroundColor Yellow  "[APPVEYOR] [$([datetime]::UtcNow)] $message"
+      }
+      #
+      Write-Info "Hello, I'm appveyor.yml! All messages from me, looks like this one."
+
+# Artifacts would not be collected if build failed. To do that, we use on_finish:
+#artifacts:
+  #- path: out\*.zip
+
+on_finish:
+  - ps: |
+      ls .\out | % { Push-AppveyorArtifact $_.FullName }
+
+test_script:
+  - ps: |
+      # setup variables for the whole build process
+      #
+      $script:failedTestsCount = 0
+      $webClient = New-Object 'System.Net.WebClient';
+      #
+      function RunTest([string]$filePath) {
+          $testResultsFile = "TestsResults.xml"
+          $res = Invoke-Pester -Path $filePath -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru
+          $webClient.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
+          return $res
+      }
+      #
+      function Write-Info([string]$message) {
+        Write-Host -ForegroundColor Yellow  "[APPVEYOR] [$([datetime]::UtcNow)] $message"
+      }
+      #
+      Write-Info "Hello, I'm appveyor.yml! All messages from me, looks like this one."
+      
+      ".\tests" | %{ 
+        $res = RunTest $_
+        $script:failedTestsCount += $res.FailedCount 
+      }
+      
