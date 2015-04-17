@@ -5,11 +5,9 @@ install:
 
 build_script:
   - ps: |
-      function Write-Info([string]$message) {
-        Write-Host -ForegroundColor Yellow  "[APPVEYOR] [$([datetime]::UtcNow)] $message"
-      }
-      #
-      Write-Info "Hello, I'm appveyor.yml! All messages from me, looks like this one."
+      mkdir -force .\out > $null
+      7z a -tzip .\out\ConvertToHtml.zip .\ConvertToHtml\*.*
+      
 
 # Artifacts would not be collected if build failed. To do that, we use on_finish:
 #artifacts:
