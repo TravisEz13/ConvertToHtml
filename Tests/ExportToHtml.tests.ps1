@@ -223,6 +223,69 @@ try
             (Find-FormatJsonFromFile -allInput $objects) | should be (get-content -raw -path "$PSScriptRoot\..\ConvertToHtml\ExportHtml.System.Diagnostics.Process.Json")
         }
     }
+    Describe 'Convert-FormatObjectJson for an existing json' {
+        $formatJsonString = (get-content -raw -path "$PSScriptRoot\..\ConvertToHtml\ExportHtml.System.Diagnostics.Process.Json")
+        $propertyCount = 8
+        It 'should be of the correct type' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).pstypenames | should be 'ConvertToHtml.FormatTables'
+        }
+        It 'ColumnHeadings should be a hashtable' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).ColumnHeadings.GetType() | should be ([HashTable].Name)   
+        }
+        It "ColumnHeadings should have $propertyCount items" {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).ColumnHeadings.Count | should be $propertyCount   
+        }
+        It 'ColumnBackgroundColor should be a hashtable' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).ColumnBackgroundColor.GetType() | should be ([HashTable].Name)   
+        }
+        It "ColumnBackgroundColor should have 1 items" {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).ColumnBackgroundColor.Count | should be 1  
+        }
+        It 'Property should be an object array' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).Property.GetType() | should be ([object[]].FullName)   
+        }
+        It "Property should have $propertyCount items" {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).Property.Count | should be $propertyCount
+        }
+        It 'GroupBy should be $null' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).GroupBy | should be $null  
+        }
+        It 'GroupByHeading should be $null' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).GroupByHeading | should be $null  
+        }
+    }
+    Describe 'Convert-FormatObjectJson for a json from New-FormattedHtmlJson' {
+        $property = @{foo='bar'; foo2='bar2'}
+        $formatJsonString = New-Object -TypeName PSObject -property $property | New-FormattedHtmlJson
+        $propertyCount = 2
+        It 'should be of the correct type' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).pstypenames | should be 'ConvertToHtml.FormatTables'
+        }
+        It 'ColumnHeadings should be a hashtable' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).ColumnHeadings.GetType() | should be ([HashTable].Name)   
+        }
+        It "ColumnHeadings should have $propertyCount items" {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).ColumnHeadings.Count | should be $propertyCount   
+        }
+        It 'ColumnBackgroundColor should be a hashtable' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).ColumnBackgroundColor.GetType() | should be ([HashTable].Name)   
+        }
+        It "ColumnBackgroundColor should have 1 items" {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).ColumnBackgroundColor.Count | should be 1  
+        }
+        It 'Property should be an object array' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).Property.GetType() | should be ([object[]].FullName)   
+        }
+        It "Property should have $propertyCount items" {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).Property.Count | should be $propertyCount
+        }
+        It 'GroupBy should be $null' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).GroupBy | should be $null  
+        }
+        It 'GroupByHeading should be $null' {
+            (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).GroupByHeading | should be $null  
+        }
+    }
 }
 finally
 {

@@ -53,38 +53,18 @@ function ConvertTo-FormattedHtml
 
             if($gotformatJson)
             {
-                [PSObject] $formatObject = $formatObjectJson | ConvertFrom-Json
+                $formatJsonTables = Convert-FormatObjectJson -formatObjectJson $formatObjectJson
 
-                [HashTable] $columnHeadings = @{}
-                foreach($columnHeading in $formatObject.ColumnHeadings)
-                {
-                     $columnHeading.PSObject.Members| ForEach-Object -Process {
-                            if($_.MemberType -eq 'NoteProperty') {
-                                $columnHeadings.Add($_.Name,$_.Value)
-                            }
-                        }
-                }
-
-                [HashTable] $columnBGColors = @{}
-                foreach($columnHeading in $formatObject.ColumnBackgroundColor)
-                {
-                     $columnHeading.PSObject.Members| ForEach-Object -Process {
-                            if($_.MemberType -eq 'NoteProperty') {
-                                $columnBGColors.Add($_.Name,$_.Value)
-                            }
-                        }
-                }
-
-                   [string] $result = Export-Html -InputObject $allInput -Property $formatObject.Property -GroupBy $formatObject.GroupBy -GroupByHeading $formatObject.GroupByHeading -ColumnHeadings $columnHeadings -ColumnBackgroundColors $columnBGColors @exportHtmlParams
+                [string] $result = Export-Html -InputObject $allInput -Property $formatJsonTables.Property -GroupBy $formatJsonTables.GroupBy -GroupByHeading $formatJsonTables.GroupByHeading -ColumnHeadings $formatJsonTables.columnHeadings -ColumnBackgroundColors $formatJsonTables.columnBackgroundColors @exportHtmlParams
                    
-                   if($OutClipboard)
-                   {
-                        $result | Out-Clipboard
-                   }
-                   else
-                   {
-                        $result
-                   }
+                if($OutClipboard)
+                {
+                    $result | Out-Clipboard
+                }
+                else
+                {
+                    $result
+                }
             }
             else
             {
@@ -103,6 +83,58 @@ function ConvertTo-FormattedHtml
         }
     }
 }
+
+<#
+.Synopsis
+    Converts a Format Json string to a PSObject
+#>
+function Convert-FormatObjectJson
+{
+
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory=$true, Position=0, HelpMessage='Please add a help message here')]
+        [Object]
+        $formatObjectJson
+    )    
+    
+    [PSObject] $formatObject = $formatObjectJson | ConvertFrom-Json
+    
+    [HashTable] $columnHeadings = @{}
+    foreach($columnHeading in $formatObject.ColumnHeadings)
+    {
+        $columnHeading.PSObject.Members| ForEach-Object -Process {
+            if($_.MemberType -eq 'NoteProperty') {
+                $columnHeadings.Add($_.Name,$_.Value)
+            }
+        }
+    }
+    
+    [HashTable] $columnBGColors = @{}
+    foreach($columnHeading in $formatObject.ColumnBackgroundColor)
+    {
+        $columnHeading.PSObject.Members| ForEach-Object -Process {
+            if($_.MemberType -eq 'NoteProperty') {
+                $columnBGColors.Add($_.Name,$_.Value)
+            }
+        }
+    }
+
+    $returnValue = (New-Object -TypeName PSObject -Property @{
+        ColumnHeadings = $columnHeadings
+        ColumnBackgroundColor = $columnBGColors
+        Property = $formatObject.Property
+        GroupBy = $formatObject.GroupBy
+        GroupByHeading = $formatObject.GroupByHeading
+
+    })
+    $returnValue.pstypenames.clear()
+    $returnValue.pstypenames.add('ConvertToHtml.FormatTables')
+    return $returnValue
+}
+
+
 
 <#
 .Synopsis
