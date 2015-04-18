@@ -66,7 +66,7 @@ Description = 'functions to export to html'
 # NestedModules = @()
 
 # Functions to export from this module
-FunctionsToExport = @'ConvertTo-FormattedHtml','Out-Browser')
+FunctionsToExport = @('ConvertTo-FormattedHtml','Out-Browser')
 
 # Cmdlets to export from this module
 CmdletsToExport = '*'
