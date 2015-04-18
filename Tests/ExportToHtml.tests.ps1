@@ -108,10 +108,13 @@ try
 
         $html = 'foo'
         $result = (Get-CF_Html -html $html)
-        $memStream = [System.IO.MemoryStream]::new([System.Text.UnicodeEncoding]::Unicode.GetBytes($result))
+        [Byte[]] $buffer = [System.Text.UnicodeEncoding]::Unicode.GetBytes($result)
+        $memStream = New-Object -TypeName 'System.IO.MemoryStream' 
+        $memStream.Write($buffer, 0, $buffer.length)
+        $memStream.Position = 0
         $lines=@()
         try {
-            $streamReader =[System.IO.StreamReader]::new($memStream,[System.Text.UnicodeEncoding]::Unicode)
+            $streamReader = New-Object -TypeName 'System.IO.StreamReader' -ArgumentList @($memStream, [System.Text.UnicodeEncoding]::Unicode)
             while(!$streamReader.EndOfStream)
             {
                 $lines += $streamReader.ReadLine()
