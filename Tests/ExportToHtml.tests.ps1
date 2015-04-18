@@ -93,6 +93,57 @@ try
                 Format-Number -value 28 -totalLength 1 | should be '28'
             }
     }
+    Describe 'Get-CF_Html' {
+        BeforeEach {
+            Suite.BeforeEach
+        }
+
+        AfterEach {
+        }
+        $headerLength = 89
+        It "Should add header of length $headerLength"{
+            $html = 'foo'
+            ((Get-CF_Html -html $html).length - $html.length) | should be $headerLength
+        }
+
+        $html = 'foo'
+        $result = (Get-CF_Html -html $html)
+        $memStream = [System.IO.MemoryStream]::new([System.Text.UnicodeEncoding]::Unicode.GetBytes($result))
+        $lines=@()
+        try {
+            $streamReader =[System.IO.StreamReader]::new($memStream,[System.Text.UnicodeEncoding]::Unicode)
+            while(!$streamReader.EndOfStream)
+            {
+                $lines += $streamReader.ReadLine()
+            }
+        }
+        finally
+        {
+            $memStream.Close()
+        }
+        $end = $headerLength + $html.length
+        It 'First Header line should be version 0.9'{
+            $lines[0] | should be "Version:0.9"
+        }
+        It "Second header line should be StartHTML:0000$headerLength"{
+            $lines[1] | should be "StartHTML:0000$headerLength"
+        }
+        It "Third header line should be EndHTML:0000$end"{
+            $lines[2] | should be "EndHTML:0000$end"
+        }
+        It "Forth Header line should be StartFragment:0000$headerLength"{
+            $lines[3] | should be "StartFragment:0000$headerLength"
+        }
+        It "Fifth header line should be EndFragment:0000$end"{
+            $lines[4] | should be "EndFragment:0000$end"
+        }
+        It "Should not be longer than end length" {
+            $result.length | should be $end
+        }
+        It "Should contain html fragment" {
+            $result.EndsWith($html) | should be $true
+        }
+    }
 }
 finally
 {
