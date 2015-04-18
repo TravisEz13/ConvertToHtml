@@ -437,7 +437,7 @@ StartFragment:{3}
 EndFragment:{4}
 {5}
 "@
-    # Make sure header is 89 characters
+    # 80-18| 62 + 3  + 6 + 6  +6  6 = 89
     $totalLengthOfFields = 6
 
     $headerLength = 62 + 3 + ($totalLengthOfFields * 4)
@@ -453,7 +453,10 @@ EndFragment:{4}
 
     $cfHtml=[String]::Format($cfHtmlFormat,'0.9',$startHtmlString,$endHtml,$startFragment,$endFragment,$html)
 
-    Write-Debug $cfHtml
+    #$testGettingHtlm = $cfHtml.Substring($startHtml,($endHtmlPosition - ($startHtml)))
+
+    #Write-Verbose $testGettingHtlm
+    #Write-Verbose $cfHtml
     $cfHtml | Write-Output 
 }
 
