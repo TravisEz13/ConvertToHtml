@@ -212,6 +212,17 @@ try
             $formatJson.ColumnBackgroundColor.$firstPropertyName | should be '#switch ($columnValue) { default { write-Output "#EE0000"} 0 { write-Output return}}  # you can also use $this, which is the current object'
         }
     }
+    Describe 'Find-FormatJsonFromFile' {
+        It 'Should return null for an unknown Type' {
+            $objects = dir 
+            Find-FormatJsonFromFile -allInput $objects | should be $null
+        }
+        It 'Should return module json for Process Type' {
+            $objects = get-process
+            (Find-FormatJsonFromFile -allInput $objects).length | should be (get-content -raw -path "$PSScriptRoot\..\ConvertToHtml\ExportHtml.System.Diagnostics.Process.Json").length
+            (Find-FormatJsonFromFile -allInput $objects) | should be (get-content -raw -path "$PSScriptRoot\..\ConvertToHtml\ExportHtml.System.Diagnostics.Process.Json")
+        }
+    }
 }
 finally
 {

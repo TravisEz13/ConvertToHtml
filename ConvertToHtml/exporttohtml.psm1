@@ -36,7 +36,6 @@ function ConvertTo-FormattedHtml
 
         if ($allInput[0] -is [PSObject])
         {
-            [int] $i = 0
             [bool] $gotformatJson = $false
             if($formatJson.Length -gt 1)
             {
@@ -45,19 +44,11 @@ function ConvertTo-FormattedHtml
             }
             else
             {
-                [string] $typenameFormatFilePath = $null
-                do{
-                    $tempPath = (Join-Path -Path $moduleDir -ChildPath ('ExportHtml.' + $allInput[0].PSObject.TypeNames[$i] + '.json'))
-                    Write-Verbose -Message "looking for $tempPath"
-                    if (Test-Path -Path $tempPath)
-                    {
-                        $typenameFormatFilePath = $tempPath
-                        [string] $formatObjectJson = Get-Content -Path $typenameFormatFilePath
-                        $gotformatJson = $true
-                    }
-                    $i++
+                [string] $formatObjectJson = Find-FormatJsonFromFile -allInput $allInput
+                if($formatObjectJson -ne $null)
+                {
+                    $gotformatJson = $true
                 }
-                while($i -lt $allInput[0].PSObject.TypeNames.Count -and $null -eq $typenameFormatFilePath)
             }
 
             if($gotformatJson)
@@ -111,6 +102,37 @@ function ConvertTo-FormattedHtml
             }
         }
     }
+}
+
+<#
+.Synopsis
+    Gets the formatJson from a file
+#>
+function Find-FormatJsonFromFile
+{
+    param
+    (
+        [Parameter(Mandatory=$true)]
+        [Object[]]
+        $allInput
+    )
+    
+    
+    [int] $i = 0
+    [string] $typenameFormatFilePath = $null
+    do{
+        $tempPath = (Join-Path -Path $moduleDir -ChildPath ('ExportHtml.' + $allInput[0].PSObject.TypeNames[$i] + '.json'))
+        Write-Verbose -Message "looking for $tempPath"
+        if (Test-Path -Path $tempPath)
+        {
+            $typenameFormatFilePath = $tempPath
+            [string] $formatObjectJson = Get-Content -raw -Path $typenameFormatFilePath
+            return $formatObjectJson
+        }
+        $i++
+    }
+    while($i -lt $allInput[0].PSObject.TypeNames.Count -and $null -eq $typenameFormatFilePath)
+    return $null
 }
 
 <#
@@ -169,6 +191,10 @@ function New-FormattedHtmlJson
     }
 }
 
+<#
+.Synopsis
+    Creates the tables and arrays needed for various formatting functions, if we don't already have a formatting json
+#>
 function Get-DefaultFormattingTables
 {
     param
@@ -196,6 +222,10 @@ function Get-DefaultFormattingTables
         }
 }
 
+<#
+.Synopsis
+    Get the properties for the first item out of the array of objects.
+#>
 function Get-Properties
 {
     param
