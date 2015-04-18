@@ -22,7 +22,7 @@ Set-StrictMode -Version latest
 Describe 'Text files formatting' {
 
     
-    if($env:APPVEYOR -ne 'True')
+    if($env:APPVEYOR -eq 'True')
     {
         $extensionList =  @('.gitignore', '.gitattributes', '.ps1', '.psm1', '.json', '.xml', '.cmd', '.mof')
     }
