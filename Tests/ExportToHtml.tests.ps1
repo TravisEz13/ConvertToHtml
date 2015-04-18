@@ -76,7 +76,7 @@ try
                 Get-HeadingName -propertyName 'foo' -ColumnHeadings $hashtable | should be 'bar'
             }
     }
-    
+
     Describe 'Format-Number' {
         BeforeEach {
             Suite.BeforeEach
@@ -105,10 +105,6 @@ try
         }
 
         $headerLength = 89
-        It "Should add header of length $headerLength"{
-            $html = 'foo'
-            ((Get-CF_Html -html $html).length - $html.length) | should be $headerLength
-        }
 
         $html = 'foo'
         $result = (Get-CF_Html -html $html)
@@ -134,14 +130,17 @@ try
         {
             # Don't run these on appveyor due to this issue:
             # https://github.com/TravisEz13/ConvertToHtml/issues/2
-            It 'First Header line should be version 0.9'{
-                $lines[0] | should be "Version:0.9"
-            }
+
             It "Should not be longer than end length" {
                 $result.length | should be $end
             }
+            It "Should add header of length $headerLength"{
+                ($result.length - $html.length) | should be $headerLength
+            }
         }
-
+        It 'First Header line should be version 0.9'{
+            $lines[0] | should be "Version:0.9"
+        }
         It "Second header line should be StartHTML:0000$headerLength"{
             $lines[1] | should be "StartHTML:0000$headerLength"
         }
