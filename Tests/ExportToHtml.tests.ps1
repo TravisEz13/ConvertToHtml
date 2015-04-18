@@ -27,8 +27,6 @@ function Clear-TestDirectories {
 
 try
 {
-    Suite.BeforeAll
-
     Describe 'Get-BackgroundColorStyle' {
         BeforeEach {
             Suite.BeforeEach

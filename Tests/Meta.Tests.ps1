@@ -20,8 +20,19 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 Describe 'Text files formatting' {
+
     
-    $allTextFiles = Get-ChildItem -File -Recurse $RepoRoot | ? { @('.gitignore', '.gitattributes', '.ps1', '.psm1', '.psd1', '.json', '.xml', '.cmd', '.mof') -contains $_.Extension } 
+    if($env:APPVEYOR -ne 'True')
+    {
+        $extensionList =  @('.gitignore', '.gitattributes', '.ps1', '.psm1', '.json', '.xml', '.cmd', '.mof')
+    }
+    else 
+    {
+        # We rewrite the psd1 on appveyor, that's fine as long as it's not checked in.
+        $extensionList =  @('.gitignore', '.gitattributes', '.ps1', '.psm1', '.psd1', '.json', '.xml', '.cmd', '.mof')        
+    }
+
+    $allTextFiles = Get-ChildItem -File -Recurse $RepoRoot | ? { $extensionList -contains $_.Extension } 
     
     Context 'Files encoding' {
 

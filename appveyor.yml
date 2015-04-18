@@ -15,6 +15,7 @@ build_script:
       {
           $FunctionsToExport += $key
       }
+      copy-item .\ConvertToHtml\ConvertTohtml.psd1 .\ConvertTohtmlOrigPsd1.ps1
       New-ModuleManifest -Path .\ConvertToHtml\ConvertTohtml.psd1 -Guid $moduleInfo.Guid -Author $moduleInfo.Author -CompanyName $moduleInfo.CompanyName `
        -Copyright $moduleInfo.Copyright -RootModule $moduleInfo.RootModule -ModuleVersion $newVersion -Description $moduleInfo.Description -FunctionsToExport $FunctionsToExport
 
