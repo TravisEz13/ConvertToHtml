@@ -157,8 +157,64 @@ try
             $result.EndsWith($html) | should be $true
         }
     }
+
+    Describe 'Get-Properties' {
+        It "Should return all properties" {
+            (Get-Properties -allInput (New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'})).Count | should be 2
+        }
+        It "Should return properties of the first object" {
+            (Get-Properties -allInput @(
+                (New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'}),
+                (New-Object -TypeName PSObject -property @{foo='bar'}))).Count | should be 2
+        }
+        It "property Names should match" {
+            (Get-Properties -allInput (New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'})) | should be @('foo','foo2')
+        }
+    }
+
+    Describe 'New-FormattedHtmlJson' {
+        It 'should not throw' {
+            {New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'} | New-FormattedHtmlJson | ConvertFrom-Json} | should not throw 
+        }
+        $firstPropertyName = 'foo'
+        $property = @{$firstPropertyName='bar'; foo2='bar2'}
+        $objectToFormat = New-Object -TypeName PSObject -property $property
+        $formatJson = $objectToFormat | New-FormattedHtmlJson | ConvertFrom-Json
+        it 'heading should be TypeName' {
+            $formatJson.heading | should be $objectToFormat.GetType().FullName 
+        }
+        it 'TypeName should be TypeName' {
+            $formatJson.TypeName | should be $objectToFormat.GetType().FullName 
+        }
+        it 'DoesntExist should throw' {
+            {$formatJson.DoesntExist} | should throw 
+        }
+        it 'GroupBy should be $null' {
+            $formatJson.GroupBy | should be $null 
+        }
+        it 'GroupByHeading should be $null' {
+            $formatJson.GroupByHeading | should be $null 
+        }
+        foreach($propertyName in $property.Keys)
+        {
+            it "property array should have property: $propertyName" {
+                $formatJson.property -contains $propertyName | should be $true 
+
+            }
+        }
+        foreach($propertyName in $property.Keys)
+        {
+            it "ColumnHeadings should have property: $propertyName" {
+                $formatJson.ColumnHeadings.$propertyName | should be $propertyName 
+            }
+        }
+        It 'ColumnBackgroundColor should have an example' {
+            $formatJson.ColumnBackgroundColor.$firstPropertyName | should be '#switch ($columnValue) { default { write-Output "#EE0000"} 0 { write-Output return}}  # you can also use $this, which is the current object'
+        }
+    }
 }
 finally
 {
     Suite.AfterAll
 }
+

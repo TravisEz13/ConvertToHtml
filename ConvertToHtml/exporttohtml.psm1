@@ -12,7 +12,6 @@ function ConvertTo-FormattedHtml
     param(
         [parameter(Mandatory=$true,ValueFromPipeline=$true)]
         [PSObject[]]$InputObject = $null,
-        [switch]$CreateMissingJson = $false,
         [string]$Title = $null,
         [switch]$OutClipboard = $false,
         [switch]$bodyOnly = $false,
@@ -99,38 +98,8 @@ function ConvertTo-FormattedHtml
             else
             {
                 Write-Verbose -Message 'Json missing, using properites...'
-                [string[]] $properties = @()
-                $allInput[0] | Get-Member -membertype 'properties'| ForEach-Object -Process {$properties += $_.Name}
-                [HashTable] $columnHeadings = @{}
-                foreach($property in $properties)
-                {
-                    $columnHeadings.Add($property,$property)
-                }
 
-                [HashTable] $ColumnBackgroundColor=@{}
-                $ColumnBackgroundColor.Add($properties[0], '#switch ($columnValue) { default { write-Output "#EE0000"} 0 { write-Output return}}  # you can also use $this, which is the current object');
-
-                [string] $thisTypeName = $allInput[0].PSObject.TypeNames[0]
-                if($CreateMissingJson)
-                {
-                    Write-Verbose -Message 'Creating Json'
-                    [HashTable] $jsonProperties = @{
-                        'TypeName'=$thisTypeName
-                        'Property'=$properties
-                        'GroupBy'=$null;
-                        'GroupByHeading'=$null;
-                        'ColumnHeadings'= $columnHeadings;
-                        'Heading' = $thisTypeName;
-                        'ColumnBackgroundColor' = $ColumnBackgroundColor;
-                    }
-                    [PSObject] $jsonObject = New-Object –TypeName PSObject –Prop $jsonProperties 
-                    $jsonObject.PSObject.TypeNames[0] = 'Export.Html.Format'
-                    [string] $filename="ExportHtml.$thisTypeName.Json"
-                    $jsonObject | ConvertTo-Json | Out-File -FilePath $filename
-                    Write-Warning -Message "Created missing Json: $filename"
-                }
-
-                [string] $result = Export-Html -InputObject $allInput -Property $properties -Heading $title @exportHtmlParams
+                [string] $result = Export-Html -InputObject $allInput -Property (Get-Properties -allInput $allInput) -Heading $title @exportHtmlParams
                 if($OutClipboard)
                    {
                         $result | Out-Clipboard
@@ -143,6 +112,103 @@ function ConvertTo-FormattedHtml
         }
     }
 }
+
+<#
+.Synopsis
+    Creates a formatting Json for the array of objects.
+#>
+function New-FormattedHtmlJson
+{
+    param(
+        [parameter(Mandatory=$true,ValueFromPipeline=$true)]
+        [PSObject[]]$InputObject = $null
+)
+    Begin
+    {
+        [PSObject[]] $allInput = @();
+    }
+
+    process
+    {
+        foreach($item in $InputObject)
+        {
+            $allInput += $item;
+        }
+    }
+
+    end
+    {
+
+        if ($allInput[0] -is [PSObject])
+        {
+                Write-Verbose -Message 'Creating Formatting Json'
+
+                $formattingTables = Get-DefaultFormattingTables -allInput $allInput
+                [HashTable] $columnHeadings = $formattingTables.ColumnHeadings
+                [HashTable] $ColumnBackgroundColor= $formattingTables.ColumnBackgroundColor
+                [string] $thisTypeName = $formattingTables.thisTypeName
+                $properties = $formattingTables.Properties
+
+                    Write-Verbose -Message 'Creating Json'
+                    [HashTable] $jsonProperties = @{
+                        'TypeName'=$thisTypeName
+                        'Property'=$properties
+                        'GroupBy'=$null;
+                        'GroupByHeading'=$null;
+                        'ColumnHeadings'= $columnHeadings;
+                        'Heading' = $thisTypeName;
+                        'ColumnBackgroundColor' = $ColumnBackgroundColor;
+                    }
+                    [PSObject] $jsonObject = New-Object –TypeName PSObject –Prop $jsonProperties 
+                    $jsonObject.PSObject.TypeNames[0] = 'Export.Html.Format'
+                    #[string] $filename="ExportHtml.$thisTypeName.Json"
+                    $jsonObject | ConvertTo-Json | Write-Output
+                    #Write-Warning -Message "Created missing Json: $filename"
+            
+        }
+    }
+}
+
+function Get-DefaultFormattingTables
+{
+    param
+    (
+        [object[]] $allInput
+    )
+
+    [string[]] $properties = Get-Properties -allInput $allInput
+    [HashTable] $columnHeadings = @{}
+    foreach($property in $properties)
+    {
+        $columnHeadings.Add($property,$property)
+    }
+    
+    [HashTable] $ColumnBackgroundColor=@{}
+    $ColumnBackgroundColor.Add($properties[0], '#switch ($columnValue) { default { write-Output "#EE0000"} 0 { write-Output return}}  # you can also use $this, which is the current object');
+    
+    [string] $thisTypeName = $allInput[0].PSObject.TypeNames[0]
+
+    return @{
+            Properties = $properties
+            ColumnHeadings = $columnHeadings
+            ColumnBackgroundColor = $ColumnBackgroundColor
+            thisTypeName = $thisTypeName
+        }
+}
+
+function Get-Properties
+{
+    param
+    (
+        [object[]] $allInput
+    )
+    
+    [string[]] $properties = @()
+    $allInput[0] | Get-Member -membertype 'properties'| ForEach-Object -Process {$properties += $_.Name}
+    return $properties
+}
+
+
 
 <#
 .Synopsis
