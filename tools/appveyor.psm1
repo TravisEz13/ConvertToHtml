@@ -1,4 +1,4 @@
-[string] $moduleDir = Split-Path -Path $script:MyInvocation.MyCommand.Path –Parent
+[string] $moduleDir = Split-Path -Path $script:MyInvocation.MyCommand.Path Â–Parent
 
 Set-StrictMode -Version latest
 Function Invoke-AppveyorInstall
