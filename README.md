@@ -1,8 +1,13 @@
 # ConvertToHtml
 PowerShell Module to convert PSObjects to formatted Html (targeted to Outlook)
 
-I plan to publish to PowerShell Gallery, but currently to install:
+WMF/PowerShell 5 Installation
+---------------------------------
+1. Register-PSRepository -Name converttohtml -SourceLocation https://ci.appveyor.com/nuget/converttohtml-t37xti79gww1
+2. Install-module ConvertToHtml
 
+WMF/PowerShell 4 Installation
+-----------------------------
  1. Clone the repo, 
  2. Copy the ConvertToHtml folder to C:\Program
     Files\WindowsPowerShell\Modules
