@@ -60,7 +60,7 @@ Function Invoke-AppveyorTest
     $res = RunTest -filePath $_ -CodeCoverage @('.\ConvertToHtml\exporttohtml.psm1')
     $script:failedTestsCount += $res.FailedCount 
     $CodeCoverageTitle = "Code Coverage {0:F1}%"  -f (100 * ($res.CodeCoverage.NumberOfCommandsExecuted /$res.CodeCoverage.NumberOfCommandsAnalyzed))
-    $res.CodeCoverage.MissedCommands | ConvertTo-FormattedHtml -title CodeCoverageTitle | out-file .\examples\CodeCoverage.html
+    $res.CodeCoverage.MissedCommands | ConvertTo-FormattedHtml -title $CodeCoverageTitle | out-file .\examples\CodeCoverage.html
     }
 
     7z a -tzip .\out\examples.zip .\examples\*.html
@@ -72,7 +72,7 @@ Function Invoke-AppveyorTest
 function RunTest {
 param
 (
-    [string]$filePath, [HashTable] $CodeCoverage
+    [string]$filePath, [Object[]] $CodeCoverage
     )
     Write-Info "Running tests: $filePath"
     $testResultsFile = "TestsResults.xml"
