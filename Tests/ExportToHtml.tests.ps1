@@ -22,9 +22,6 @@ function Suite.AfterAll {
 function Suite.BeforeEach {
 }
 
-function Clear-TestDirectories {
-}
-
 try
 {
     Describe 'Get-BackgroundColorStyle' {
@@ -211,6 +208,11 @@ try
         }
     }
     Describe 'Find-FormatJsonFromFile' {
+        It 'Should return null for a custom object' {
+            $property = @{foo='bar'; foo2='bar2'}
+            $objects = New-Object -TypeName PSCustomObject -property $property 
+            Find-FormatJsonFromFile -allInput $objects | should be $null
+        }
         It 'Should return null for an unknown Type' {
             $objects = dir 
             Find-FormatJsonFromFile -allInput $objects | should be $null
@@ -282,6 +284,19 @@ try
         }
         It 'GroupByHeading should be $null' {
             (Convert-FormatObjectJson -FormatObjectJson $formatJsonString).GroupByHeading | should be $null  
+        }
+    }
+    Describe 'Get-HtmlEncodedValue' {
+        It 'should html encode "<" to &lt;'{
+            Get-HtmlEncodedValue -value 'a<b' | should be 'a&lt;b'
+        }
+        It 'should html encode ">" to &lt;'{
+            Get-HtmlEncodedValue -value 'a>b' | should be 'a&gt;b'
+        }
+        It 'should not encode any other character' {
+            # not sure this is 100% correct, but please keep repesentative of the code.
+            $stringToEncode = '!@#$%^&*()[]][/=+?\|",.;:pyfcrlaoeuidhtns-qjkxbmwz'
+            Get-HtmlEncodedValue -value $stringToEncode | should be $stringToEncode
         }
     }
 }

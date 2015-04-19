@@ -12,6 +12,7 @@ build_script:
       $nuGetPath = "$env:SystemDrive\nuget.exe"
       mkdir -force .\out > $null
       mkdir -force .\nuget > $null
+      mkdir -force .\examples > $null
 
       # Update version to current Build Version
       $versionParts = ($env:APPVEYOR_BUILD_VERSION).split('.')
@@ -52,9 +53,13 @@ test_script:
       $script:failedTestsCount = 0
       $webClient = New-Object 'System.Net.WebClient';
       #
-      function RunTest([string]$filePath) {
+      function RunTest {
+        param
+        (
+          [string]$filePath, [Object[]] $CodeCoverage
+          )
           $testResultsFile = "TestsResults.xml"
-          $res = Invoke-Pester -Path $filePath -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru
+          $res = Invoke-Pester -Path $filePath -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru -CodeCoverage $CodeCoverage
           $webClient.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
           return $res
       }
@@ -65,9 +70,15 @@ test_script:
       #
       Write-Info "Hello, I'm appveyor.yml! All messages from me, looks like this one."
       
+      $coverage.CodeCoverage.MissedCommands | ConvertTo-FormattedHtml -OutClipboard
+      $CodeCoverage = @('.\ConvertToHtml\exporttohtml.psm1')
       ".\tests" | %{ 
-        $res = RunTest $_
+        $res = RunTest -filePath $_ -CodeCoverage @('.\ConvertToHtml\exporttohtml.psm1')
         $script:failedTestsCount += $res.FailedCount 
+        $CodeCoverageTitle = "Code Coverage {0:F1}%"  -f (100 * ($res.CodeCoverage.NumberOfCommandsExecuted /$res.CodeCoverage.NumberOfCommandsAnalyzed))
+        $res.CodeCoverage.MissedCommands | ConvertTo-FormattedHtml -title $CodeCoverageTitle | out-file .\examples\CodeCoverage.html
       }
+
+      7z a -tzip .\out\examples.zip .\examples\*.html
       
       if ($script:failedTestsCount -gt 0) { throw "$($script:failedTestsCount) tests failed."} else {       ls .\nuget | % { Push-AppveyorArtifact $_.FullName }}
