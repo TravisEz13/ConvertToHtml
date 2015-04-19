@@ -33,15 +33,7 @@ Function Invoke-AppveyorBuild
     Update-ModuleVersion
 
     
-    if($branchName -ieq 'master' -and [string]::IsNullOrEmpty($pullRequestTitle))
-    {
-        $moduleName = 'ConvertToHtml'
-    }
-    else
-    {
-        $moduleName = "ConvertToHtml.$branchName"
-    }
-    Update-Nuspec -ModuleName $moduleName
+    Update-Nuspec -ModuleName 'ConvertToHtml'
 
     Write-Info 'Creating nuget package ...'
     &$nuGetPath pack .\ConvertToHtml\ConvertToHtml.nuspec -outputdirectory  .\nuget
@@ -77,10 +69,17 @@ Function Invoke-AppveyorTest
     } 
     else 
     {       
+        if($branchName -ieq 'master' -and [string]::IsNullOrEmpty($pullRequestTitle))
+        {
         Get-ChildItem .\nuget | % { 
-                Write-Info "Pushing nuget package $_.Name to Appveyor"
-                Push-AppveyorArtifact $_.FullName 
+                    Write-Info "Pushing nuget package $_.Name to Appveyor"
+                    Push-AppveyorArtifact $_.FullName
             }
+        }
+        else 
+        {
+            Write-Info "Skipping nuget package publishing because the build is not for the master branch or is a pull request."
+        }
     }
     Write-Info 'End Test Stage.'
 }
