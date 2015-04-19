@@ -53,7 +53,11 @@ test_script:
       $script:failedTestsCount = 0
       $webClient = New-Object 'System.Net.WebClient';
       #
-      function RunTest([string]$filePath, [HashTable] $CodeCoverage) {
+      function RunTest {
+        param
+        (
+          [string]$filePath, [HashTable] $CodeCoverage
+          )
           $testResultsFile = "TestsResults.xml"
           $res = Invoke-Pester -Path $filePath -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru -CodeCoverage $CodeCoverage
           $webClient.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
@@ -75,6 +79,6 @@ test_script:
         $res.CodeCoverage.MissedCommands | ConvertTo-FormattedHtml -title CodeCoverageTitle | out-file .\examples\CodeCoverage.html
       }
 
-      7z a -tzip .\out\examples.html .\examples\*.html
+      7z a -tzip .\out\examples.zip .\examples\*.html
       
       if ($script:failedTestsCount -gt 0) { throw "$($script:failedTestsCount) tests failed."} else {       ls .\nuget | % { Push-AppveyorArtifact $_.FullName }}
