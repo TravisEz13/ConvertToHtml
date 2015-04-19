@@ -31,7 +31,7 @@ build_script:
       # Create Nuget package
       [xml]$xml = Get-Content -Raw .\ConvertToHtml\ConvertToHtml.nuspec
       $xml.package.metadata.version = $env:APPVEYOR_BUILD_VERSION
-      $xml.OuterXml | out-file -path .\ConvertToHtml\ConvertToHtml.nuspec
+      $xml.OuterXml | out-file -FilePath .\ConvertToHtml\ConvertToHtml.nuspec
       &$nuGetPath pack .\ConvertToHtml\ConvertToHtml.nuspec -outputdirectory  .\nuget
 
       7z a -tzip .\out\ConvertToHtml.zip .\ConvertToHtml\*.*
