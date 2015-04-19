@@ -2,10 +2,18 @@ version: 1.0.0.{build}
 
 install:
   - cinst pester
+  - ps: |
+      $nuGetPath = "$env:SystemDrive\nuget.exe"
+      $webClient = New-Object 'System.Net.WebClient';
+      $webClient.DownloadFile( 'https://oneget.org/nuget-anycpu-2.8.3.6.exe', $nuGetPath )  
 
 build_script:
   - ps: |
+      $nuGetPath = "$env:SystemDrive\nuget.exe"
       mkdir -force .\out > $null
+      mkdir -force .\nuget > $null
+
+      # Update version to current Build Version
       $versionParts = ($env:APPVEYOR_BUILD_VERSION).split('.')
       Import-Module .\ConvertToHtml
       $moduleInfo = Get-Module -Name ConvertToHtml
@@ -18,13 +26,20 @@ build_script:
       copy-item .\ConvertToHtml\ConvertTohtml.psd1 .\ConvertTohtmlOrigPsd1.ps1
       New-ModuleManifest -Path .\ConvertToHtml\ConvertTohtml.psd1 -Guid $moduleInfo.Guid -Author $moduleInfo.Author -CompanyName $moduleInfo.CompanyName `
        -Copyright $moduleInfo.Copyright -RootModule $moduleInfo.RootModule -ModuleVersion $newVersion -Description $moduleInfo.Description -FunctionsToExport $FunctionsToExport
+      # Done Updating Version
+
+      # Create Nuget package
+      [xml]$xml = Get-Content -Raw .\ConvertToHtml\ConvertToHtml.nuspec
+      $xml.package.metadata.version = $env:APPVEYOR_BUILD_VERSION
+      $xml.OuterXml | out-file -FilePath .\ConvertToHtml\ConvertToHtml.nuspec
+      &$nuGetPath pack .\ConvertToHtml\ConvertToHtml.nuspec -outputdirectory  .\nuget
 
       7z a -tzip .\out\ConvertToHtml.zip .\ConvertToHtml\*.*
       
 
 # Artifacts would not be collected if build failed. To do that, we use on_finish:
-#artifacts:
-  #- path: out\*.zip
+#-artifacts:
+#  - path: nuget\*.nupkg
 
 on_finish:
   - ps: |
@@ -55,4 +70,4 @@ test_script:
         $script:failedTestsCount += $res.FailedCount 
       }
       
-      if ($script:failedTestsCount -gt 0) { throw "$($script:failedTestsCount) tests failed."}
+      if ($script:failedTestsCount -gt 0) { throw "$($script:failedTestsCount) tests failed."} else {       ls .\nuget | % { Push-AppveyorArtifact $_.FullName }}
