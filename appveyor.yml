@@ -56,7 +56,7 @@ test_script:
       function RunTest {
         param
         (
-          [string]$filePath, [HashTable] $CodeCoverage
+          [string]$filePath, [Object[]] $CodeCoverage
           )
           $testResultsFile = "TestsResults.xml"
           $res = Invoke-Pester -Path $filePath -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru -CodeCoverage $CodeCoverage
