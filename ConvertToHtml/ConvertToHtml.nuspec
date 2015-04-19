@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>ConvertToHtml</id>
+    <version>1.0.0.1</version>
+    <authors>Travis Plunk</authors>
+    <owners>Microsoft Corporation</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>functions to export to html</description>
+    <releaseNotes />
+    <copyright>Copyright Microsoft</copyright>
+    <tags>PSModule PSIncludes_Function PSFunction_ConvertTo-FormattedHtml PSFunction_Out-Browser PSCommand_ConvertTo-FormattedHtml PSCommand_Out-Browser</tags>
+  </metadata>
+</package>
