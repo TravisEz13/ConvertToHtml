@@ -45,7 +45,7 @@ function ConvertTo-FormattedHtml
             else
             {
                 [string] $formatObjectJson = Find-FormatJsonFromFile -allInput $allInput
-                if($formatObjectJson -ne $null)
+                if($formatObjectJson)
                 {
                     $gotformatJson = $true
                 }
@@ -55,7 +55,7 @@ function ConvertTo-FormattedHtml
             {
                 $formatJsonTables = Convert-FormatObjectJson -formatObjectJson $formatObjectJson
 
-                [string] $result = Export-Html -InputObject $allInput -Property $formatJsonTables.Property -GroupBy $formatJsonTables.GroupBy -GroupByHeading $formatJsonTables.GroupByHeading -ColumnHeadings $formatJsonTables.columnHeadings -ColumnBackgroundColors $formatJsonTables.columnBackgroundColors @exportHtmlParams
+                [string] $result = Export-Html -InputObject $allInput -Property $formatJsonTables.Property -GroupBy $formatJsonTables.GroupBy -GroupByHeading $formatJsonTables.GroupByHeading -ColumnHeadings $formatJsonTables.columnHeadings -ColumnBackgroundColors $formatJsonTables.columnBackgroundColor @exportHtmlParams
                    
                 if($OutClipboard)
                 {
@@ -270,6 +270,14 @@ function Get-Properties
     return $properties
 }
 
+function Get-HtmlEncodedValue
+{
+    param(
+        [string]$value
+    )
+
+    return $value.replace('<', '&lt;').replace('>','&gt;')
+}
 
 
 <#
@@ -381,7 +389,7 @@ function Export-Html
             Set-StrictMode -Off
             foreach($propertyName in $Property)
             {
-                [string] $columnValue = $_.$propertyName
+                [string] $columnValue = Get-HtmlEncodedValue -value $_.$propertyName
                 [string] $style = Get-BackgroundColorStyle -ColumnValue $columnValue -PropertyName $propertyName -ColumnBackgroundColor $ColumnBackgroundColors -this $_
                 $sb.AppendLine("<td style='$style'>$columnValue</td>")  > $null
             }
