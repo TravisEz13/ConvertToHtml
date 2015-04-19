@@ -37,7 +37,7 @@ Function Invoke-AppveyorBuild
     }
     else
     {
-        $moduleName = "ConvertToHtml-$repoName"
+        $moduleName = "ConvertToHtml.$repoName"
     }
     Update-Nuspec -ModuleName $moduleName
 
