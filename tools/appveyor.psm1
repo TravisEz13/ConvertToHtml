@@ -3,11 +3,13 @@
 Set-StrictMode -Version latest
 $webClient = New-Object 'System.Net.WebClient';
 $repoName = ${env:APPVEYOR_REPO_NAME}
+$branchName = $env:APPVEYOR_REPO_BRANCH
 $pullRequestTitle = ${env:APPVEYOR_PULL_REQUEST_TITLE}
 Function Invoke-AppveyorInstall
 {
     Write-Info 'Starting Install stage...'
     Write-Info "Repo: $repoName"
+    Write-Info "Branch: $branchName"
     if($pullRequestTitle)
     {
         Write-Info "Pull Request:  $pullRequestTitle"    
@@ -31,13 +33,13 @@ Function Invoke-AppveyorBuild
     Update-ModuleVersion
 
     
-    if($repoName -ieq 'master' -and [string]::IsNullOrEmpty($pullRequestTitle))
+    if($branchName -ieq 'master' -and [string]::IsNullOrEmpty($pullRequestTitle))
     {
         $moduleName = 'ConvertToHtml'
     }
     else
     {
-        $moduleName = "ConvertToHtml.$repoName"
+        $moduleName = "ConvertToHtml.$branchName"
     }
     Update-Nuspec -ModuleName $moduleName
 
