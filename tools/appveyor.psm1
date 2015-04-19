@@ -1,4 +1,4 @@
-[string] $moduleDir = Split-Path -Path $script:MyInvocation.MyCommand.Path Parent
+[string] $moduleDir = Split-Path -Path $script:MyInvocation.MyCommand.Path -Parent
 
 Set-StrictMode -Version latest
 Function Invoke-AppveyorInstall
@@ -53,8 +53,6 @@ Function Invoke-AppveyorTest
     $webClient = New-Object 'System.Net.WebClient';
     #
 
- 
-    $coverage.CodeCoverage.MissedCommands | ConvertTo-FormattedHtml -OutClipboard
     $CodeCoverage = @('.\ConvertToHtml\exporttohtml.psm1')
     ".\tests" | %{ 
     $res = RunTest -filePath $_ -CodeCoverage @('.\ConvertToHtml\exporttohtml.psm1')
