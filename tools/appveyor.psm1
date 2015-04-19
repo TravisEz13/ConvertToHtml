@@ -76,6 +76,7 @@ Function Invoke-AppveyorTest
     else 
     {       
         Get-ChildItem .\nuget | % { 
+                Write-Info "Pushing nuget package $_.Name to Appveyor"
                 Push-AppveyorArtifact $_.FullName 
             }
     }
