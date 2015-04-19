@@ -36,8 +36,7 @@ build_script:
 
 # Artifacts would not be collected if build failed. To do that, we use on_finish:
 artifacts:
-  - ps: |
-      ls .\nuget | % { Push-AppveyorArtifact $_.FullName }
+  - path: nuget\*.nupkg
 
 on_finish:
   - ps: |
