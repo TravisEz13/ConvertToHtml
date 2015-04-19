@@ -111,7 +111,7 @@ function Write-Info {
 
 function Update-ModuleVersion
 {
-    Write-Info 'Updating Module version to: ${env:APPVEYOR_BUILD_VERSION}'
+    Write-Info "Updating Module version to: ${env:APPVEYOR_BUILD_VERSION}"
     $versionParts = ($env:APPVEYOR_BUILD_VERSION).split('.')
     Import-Module .\ConvertToHtml
     $moduleInfo = Get-Module -Name ConvertToHtml
@@ -124,7 +124,7 @@ function Update-ModuleVersion
     copy-item .\ConvertToHtml\ConvertTohtml.psd1 .\ConvertTohtmlOrigPsd1.ps1
     New-ModuleManifest -Path .\ConvertToHtml\ConvertTohtml.psd1 -Guid $moduleInfo.Guid -Author $moduleInfo.Author -CompanyName $moduleInfo.CompanyName `
         -Copyright $moduleInfo.Copyright -RootModule $moduleInfo.RootModule -ModuleVersion $newVersion -Description $moduleInfo.Description -FunctionsToExport $FunctionsToExport
-
+}
 function Update-Nuspec
 {
     param
@@ -133,12 +133,13 @@ function Update-Nuspec
         $ModuleName = 'ConvertToHtml'
     )
 
-    Write-Info 'Updating Module version in nuspec...'
+    Write-Info "Updatin nuspec: ${env:APPVEYOR_BUILD_VERSION}; $moduleName"
     [xml]$xml = Get-Content -Raw .\ConvertToHtml\ConvertToHtml.nuspec
     $xml.package.metadata.version = $env:APPVEYOR_BUILD_VERSION
+    $xml.package.metadata.id = $ModuleName
     $xml.OuterXml | out-file -FilePath .\ConvertToHtml\ConvertToHtml.nuspec
 }
 
 
-}
+
 
