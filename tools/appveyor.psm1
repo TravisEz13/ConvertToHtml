@@ -135,7 +135,7 @@ function Update-Nuspec
         $ModuleName = 'ConvertToHtml'
     )
 
-    Write-Info "Updatin nuspec: ${env:APPVEYOR_BUILD_VERSION}; $moduleName"
+    Write-Info "Updating nuspec: ${env:APPVEYOR_BUILD_VERSION}; $moduleName"
     [xml]$xml = Get-Content -Raw .\ConvertToHtml\ConvertToHtml.nuspec
     $xml.package.metadata.version = $env:APPVEYOR_BUILD_VERSION
     $xml.package.metadata.id = $ModuleName
