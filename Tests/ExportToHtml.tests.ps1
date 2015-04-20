@@ -99,7 +99,7 @@ try
         AfterEach {
         }
 
-        $headerLength = 89
+        $headerLength = 84
 
         $html = 'foo'
         $result = (Get-CF_Html -html $html)
@@ -121,10 +121,6 @@ try
         }
 
         $end = $headerLength + $html.length
-        if($env:APPVEYOR -ne 'True')
-        {
-            # Don't run these on appveyor due to this issue:
-            # https://github.com/TravisEz13/ConvertToHtml/issues/2
 
             It "Should not be longer than end length" {
                 $result.length | should be $end
@@ -132,7 +128,6 @@ try
             It "Should add header of length $headerLength"{
                 ($result.length - $html.length) | should be $headerLength
             }
-        }
         It 'First Header line should be version 0.9'{
             $lines[0] | should be "Version:0.9"
         }

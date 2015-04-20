@@ -576,7 +576,7 @@ EndFragment:{4}
     # Make sure header is 89 characters
     $totalLengthOfFields = 6
 
-    $headerLength = 62 + 3 + ($totalLengthOfFields * 4)
+    $headerLength = 57 + 3 + ($totalLengthOfFields * 4)
     $startHtml = $headerLength 
     $startHtmlString = Format-Number -totalLength $totalLengthOfFields -value $startHtml
 
