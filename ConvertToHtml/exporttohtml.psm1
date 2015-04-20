@@ -16,7 +16,7 @@ function ConvertTo-FormattedHtml
         [switch]$OutClipboard = $false,
         [switch]$bodyOnly = $false,
         [string]$formatJson = $null
-)
+    )
     Begin
     {
         [PSObject[]] $allInput = @();
@@ -55,7 +55,10 @@ function ConvertTo-FormattedHtml
             {
                 $formatJsonTables = Convert-FormatObjectJson -formatObjectJson $formatObjectJson
 
-                [string] $result = Export-Html -InputObject $allInput -Property $formatJsonTables.Property -GroupBy $formatJsonTables.GroupBy -GroupByHeading $formatJsonTables.GroupByHeading -ColumnHeadings $formatJsonTables.columnHeadings -ColumnBackgroundColors $formatJsonTables.columnBackgroundColor @exportHtmlParams
+                [string] $result = Export-Html -InputObject $allInput -Property $formatJsonTables.Property `
+                    -GroupBy $formatJsonTables.GroupBy -GroupByHeading $formatJsonTables.GroupByHeading `
+                    -ColumnHeadings $formatJsonTables.columnHeadings -ColumnBackgroundColors $formatJsonTables.columnBackgroundColor `
+                    @exportHtmlParams -AllowHtml $formatJsonTables.AllowHtml
                    
                 if($OutClipboard)
                 {
@@ -98,6 +101,7 @@ function Convert-FormatObjectJson
         [Object]
         $formatObjectJson
     )    
+    Set-StrictMode -off
     
     [PSObject] $formatObject = $formatObjectJson | ConvertFrom-Json
     
@@ -120,6 +124,14 @@ function Convert-FormatObjectJson
             }
         }
     }
+    if($formatObject.AllowHtml)
+    {
+        $AllowHtml = $formatObject.AllowHtml        
+    }
+    else 
+    {
+        $AllowHtml = @()
+    }
 
     $returnValue = (New-Object -TypeName PSObject -Property @{
         ColumnHeadings = $columnHeadings
@@ -127,6 +139,7 @@ function Convert-FormatObjectJson
         Property = $formatObject.Property
         GroupBy = $formatObject.GroupBy
         GroupByHeading = $formatObject.GroupByHeading
+        AllowHtml = $allowHtml
 
     })
     $returnValue.pstypenames.clear()
@@ -176,7 +189,7 @@ function New-FormattedHtmlJson
     param(
         [parameter(Mandatory=$true,ValueFromPipeline=$true)]
         [PSObject[]]$InputObject = $null
-)
+    )
     Begin
     {
         [PSObject[]] $allInput = @();
@@ -202,6 +215,7 @@ function New-FormattedHtmlJson
                 [HashTable] $ColumnBackgroundColor= $formattingTables.ColumnBackgroundColor
                 [string] $thisTypeName = $formattingTables.thisTypeName
                 $properties = $formattingTables.Properties
+                $allowHtml = @()
 
                     Write-Verbose -Message 'Creating Json'
                     [HashTable] $jsonProperties = @{
@@ -212,7 +226,9 @@ function New-FormattedHtmlJson
                         'ColumnHeadings'= $columnHeadings;
                         'Heading' = $thisTypeName;
                         'ColumnBackgroundColor' = $ColumnBackgroundColor;
+                        'AllowHtml' = $AllowHtml
                     }
+
                     [PSObject] $jsonObject = New-Object –TypeName PSObject –Prop $jsonProperties 
                     $jsonObject.PSObject.TypeNames[0] = 'Export.Html.Format'
                     #[string] $filename="ExportHtml.$thisTypeName.Json"
@@ -296,7 +312,8 @@ function Export-Html
         [String] $Heading = $null,
         [System.Collections.Hashtable] $ColumnHeadings = $null,
         [System.Collections.Hashtable] $ColumnBackgroundColors = $null,
-        [switch] $bodyOnly
+        [switch] $bodyOnly,
+        [String[]] $AllowHtml
     )
     [string] $headingStyle='width:195.8pt;border-top:solid black 1.0pt;border-left:none;border-bottom:solid #4F81BD 1.5pt;border-right:none;background:#4F81BD;padding:0in 5.4pt 0in 5.4pt;height:20.25pt'
     [string] $greyStyle='width:195.8pt;border:none;border-bottom:solid #A7BFDE 1.5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:18.75pt'
@@ -312,9 +329,6 @@ function Export-Html
     }
 
     $sb.AppendFormat('<h1>{0}</h1>',$subject)  > $null
-#    $trash=$sb.AppendLine("<h2>Summary</h2>");
-#    $trash=$sb.AppendLine("[Add summary]");
-#    $trash=$sb.AppendLine("<h2>Details</h2>");
     $sb.AppendLine('<table>')  > $null
 
     [string] $lastGroup = [string]::Empty
@@ -389,7 +403,15 @@ function Export-Html
             Set-StrictMode -Off
             foreach($propertyName in $Property)
             {
-                [string] $columnValue = Get-HtmlEncodedValue -value $_.$propertyName
+                if($AllowHtml -icontains $propertyname)
+                {
+                    # Allow Html
+                    [string] $columnValue = $_.$propertyName
+                }
+                else {
+                    # Encode value
+                    [string] $columnValue = Get-HtmlEncodedValue -value $_.$propertyName                
+                }
                 [string] $style = Get-BackgroundColorStyle -ColumnValue $columnValue -PropertyName $propertyName -ColumnBackgroundColor $ColumnBackgroundColors -this $_
                 $sb.AppendLine("<td style='$style'>$columnValue</td>")  > $null
             }
