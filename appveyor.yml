@@ -1,7 +1,7 @@
 version: 1.0.0.{build}
 
 install:
-  - cinst pester
+  - cinst pester -y
   - ps: |
       Import-module .\tools\appveyor.psm1
       Invoke-AppveyorInstall

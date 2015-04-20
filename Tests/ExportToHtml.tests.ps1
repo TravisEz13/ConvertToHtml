@@ -294,6 +294,38 @@ try
             Get-HtmlEncodedValue -value $stringToEncode | should be $stringToEncode
         }
     }
+
+    Describe 'ConvertTo-FormattedHtml' {
+        $LinkObjJson = @'
+{
+    "AllowHtml":  [
+                        'Link'
+                  ],
+    "GroupByHeading":  null,
+    "Heading":  "link",
+    "Property":  [
+                     "Link"
+                 ],
+    "ColumnHeadings":  {
+                           "Link":  "Link"
+                       },
+    "ColumnBackgroundColor":  {
+                                  "Link":  "#switch ($columnValue) { default { write-Output \"#EE0000\"} 0 { write-Output return}}  # you can also use $this, which is the current object"
+                              },
+    "GroupBy":  null,
+    "TypeName":  "link"
+}
+'@
+        It 'Should honor allowHtml in formatJson' {
+            $link = "<a href='http://www.bing.com'>bing</a>"
+            $linkObj = New-Object -TypeName PSObject -Property @{Link = $link}
+            $linkObj.psTypeNames.clear()
+            $linkObj.pstypenames.add('link')
+
+            $linkObj | ConvertTo-FormattedHtml -formatJson $LinkObjJson -bodyOnly | should match $link
+            $linkObj | ConvertTo-FormattedHtml -bodyOnly | should not match $link
+        }
+    }
 }
 finally
 {
