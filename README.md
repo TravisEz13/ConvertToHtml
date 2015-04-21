@@ -10,9 +10,8 @@ From PowerShell run:
 
 WMF/PowerShell 4 Installation
 -----------------------------
- 1. Clone the repo, 
- 2. Copy the ConvertToHtml folder to C:\Program
-    Files\WindowsPowerShell\Modules
+ 1. Download nuget.exe from [NuGet.org](https://nuget.org/nuget.exe) 
+ 2. &nuget.exe install ConvertToHtml -source https://ci.appveyor.com/nuget/converttohtml-t37xti79gww1 -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion
 
 [![Build status](https://ci.appveyor.com/api/projects/status/j1vu2x67hxjmbtes/branch/master?svg=true)](https://ci.appveyor.com/project/TravisEz13/converttohtml/branch/master)
 
