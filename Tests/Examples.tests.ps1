@@ -18,13 +18,13 @@ function Suite.BeforeAll {
 }
 
 function Suite.AfterAll {
+}
+
+function Suite.BeforeEach {
     if(!(test-path $examplesPath))
     {
         md $examplesPath > $null
     }
-}
-
-function Suite.BeforeEach {
 }
 
 

@@ -73,7 +73,7 @@ function ConvertTo-FormattedHtml
             {
                 Write-Verbose -Message 'Json missing, using properites...'
 
-                [string] $result = Export-Html -InputObject $allInput -Property (Get-Properties -allInput $allInput) -Heading $title @exportHtmlParams
+                [string] $result = Export-Html -InputObject $allInput -Property (Get-InputProperty -allInput $allInput) -Heading $title @exportHtmlParams
                 if($OutClipboard)
                    {
                         $result | Out-Clipboard
@@ -210,7 +210,7 @@ function New-FormattedHtmlJson
         {
                 Write-Verbose -Message 'Creating Formatting Json'
 
-                $formattingTables = Get-DefaultFormattingTables -allInput $allInput
+                $formattingTables = Get-DefaultFormattingTable -allInput $allInput
                 [HashTable] $columnHeadings = $formattingTables.ColumnHeadings
                 [HashTable] $ColumnBackgroundColor= $formattingTables.ColumnBackgroundColor
                 [string] $thisTypeName = $formattingTables.thisTypeName
@@ -243,14 +243,15 @@ function New-FormattedHtmlJson
 .Synopsis
     Creates the tables and arrays needed for various formatting functions, if we don't already have a formatting json
 #>
-function Get-DefaultFormattingTables
+function Get-DefaultFormattingTable
 {
     param
     (
+        [parameter(Mandatory=$true,ValueFromPipeline=$true)]
         [object[]] $allInput
     )
 
-    [string[]] $properties = Get-Properties -allInput $allInput
+    [string[]] $properties = Get-InputProperty -allInput $allInput
     [HashTable] $columnHeadings = @{}
     foreach($property in $properties)
     {
@@ -274,10 +275,11 @@ function Get-DefaultFormattingTables
 .Synopsis
     Get the properties for the first item out of the array of objects.
 #>
-function Get-Properties
+function Get-InputProperty
 {
     param
     (
+        [parameter(Mandatory=$true,ValueFromPipeline=$true)]
         [object[]] $allInput
     )
     
@@ -289,6 +291,9 @@ function Get-Properties
 function Get-HtmlEncodedValue
 {
     param(
+        [parameter(Mandatory=$true,ValueFromPipeline=$true)]
+        [AllowNull()]
+        [AllowEmptyString()]
         [string]$value
     )
 
@@ -313,7 +318,9 @@ function Export-Html
         [System.Collections.Hashtable] $ColumnHeadings = $null,
         [System.Collections.Hashtable] $ColumnBackgroundColors = $null,
         [switch] $bodyOnly,
-        [String[]] $AllowHtml
+
+        [ValidateNotNull()]
+        [String[]] $AllowHtml = @()
     )
     [string] $headingStyle='width:195.8pt;border-top:solid black 1.0pt;border-left:none;border-bottom:solid #4F81BD 1.5pt;border-right:none;background:#4F81BD;padding:0in 5.4pt 0in 5.4pt;height:20.25pt'
     [string] $greyStyle='width:195.8pt;border:none;border-bottom:solid #A7BFDE 1.5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:18.75pt'
@@ -444,15 +451,16 @@ function Export-Html
 function Get-BackgroundColorStyle
 {
     param (
-        $columnValue,
+        $columnValue = $null,
         
+        [parameter(Mandatory=$true,ValueFromPipeline=$true)]
         [string] 
         $propertyName ,
         
         [System.Collections.Hashtable]
-        $ColumnBackgroundColor,
+        $ColumnBackgroundColor = @{},
         
-        $this
+        $this = $null
     )
     if($ColumnBackgroundColor)
     {
@@ -582,7 +590,11 @@ function Out-Clipboard
 #>
 function Get-CF_Html
 {
-    param([string]$html)
+    param(
+        [parameter(Mandatory=$true,ValueFromPipeline=$true)]
+        [string]
+        $html
+    )
 
     #adding for script analyzer
     Write-Verbose -Message 'in get-cf_html'
@@ -622,8 +634,13 @@ EndFragment:{4}
 #>
 function Format-Number
 {
-    param($value, 
-    $totalLength)
+    param(
+    [parameter(Mandatory=$true,ValueFromPipeline=$true)]
+    $value, 
+    
+    [parameter(Mandatory=$true)]
+    $totalLength
+    )
 
     #TODO: make use string builder
         [string] $text = $value.ToString();
