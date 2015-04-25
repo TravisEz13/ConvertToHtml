@@ -148,17 +148,17 @@ try
         }
     }
 
-    Describe 'Get-Properties' {
+    Describe 'Get-InputProperty' {
         It "Should return all properties" {
-            (Get-Properties -allInput (New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'})).Count | should be 2
+            (Get-InputProperty -allInput (New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'})).Count | should be 2
         }
         It "Should return properties of the first object" {
-            (Get-Properties -allInput @(
+            (Get-InputProperty -allInput @(
                 (New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'}),
                 (New-Object -TypeName PSObject -property @{foo='bar'}))).Count | should be 2
         }
         It "property Names should match" {
-            (Get-Properties -allInput (New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'})) | should be @('foo','foo2')
+            (Get-InputProperty -allInput (New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'})) | should be @('foo','foo2')
         }
     }
 
