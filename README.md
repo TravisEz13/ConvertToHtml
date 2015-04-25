@@ -31,5 +31,3 @@ paste the results into outlook and verified they are formatted correctly
 Issues
 ------
 For HTML to work in Outlook 2013 and older, only inline styles can be used.
-
-Testing Pull Request
