@@ -3,6 +3,8 @@ Copyright Microsoft 2015
 
 .summary
     Test that describes code itself.
+    Adapted from:  https://github.com/PowerShell/DscResource.Tests/blob/master/Meta.Tests.ps1
+
 #>
 
 [CmdletBinding()]
@@ -61,6 +63,53 @@ Describe 'Text files formatting' {
                 }
             }
             $totalTabsCount | Should Be 0
+        }
+    }
+}
+
+Describe 'PowerShell DSC resource modules' {
+    
+    # Force convert to array
+    $psm1Files = @(ls $RepoRoot -Recurse -Filter "*.psm1" -File | ? {
+        # Ignore Composite configurations
+        # They requires additional resources to be installed on the box
+        ($_.FullName -like "*\DscResources\*") -and (-not ($_.Name -like "*.schema.psm1"))
+    })
+
+    if (-not $psm1Files) {
+        Write-Verbose -Verbose "There are no resource files to analyze"
+    } else {
+
+        Write-Verbose -Verbose "Analyzing $($psm1Files.Count) files"
+
+        Context 'Correctness' {
+
+            function Get-ParseErrors
+            {
+                param(
+                    [Parameter(ValueFromPipeline=$True,Mandatory=$True)]
+                    [string]$fileName
+                )    
+
+                $tokens = $null 
+                $errors = $null
+                $ast = [System.Management.Automation.Language.Parser]::ParseFile($fileName, [ref] $tokens, [ref] $errors)
+                return $errors
+            }
+
+
+            It 'all .psm1 files don''t have parse errors' {
+                $errors = @()
+                $psm1Files | %{ 
+                    $localErrors = Get-ParseErrors $_.FullName
+                    if ($localErrors) {
+                        Write-Warning "There are parsing errors in $($_.FullName)"
+                        Write-Warning ($localErrors | fl | Out-String)
+                    }
+                    $errors += $localErrors
+                }
+                $errors.Count | Should Be 0
+            }
         }
     }
 }

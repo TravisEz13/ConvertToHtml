@@ -1,14 +1,14 @@
 version: 1.0.0.{build}
 
 install:
-  - cinst pester -y
   - ps: |
-      Import-module .\tools\appveyor.psm1
+      &nuget.exe install PoshAppVeyor -source https://ci.appveyor.com/nuget/poshappveyor-odx6b5glnf32 -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion
+      Import-module .\tools\appveyorPhases.psm1
       Invoke-AppveyorInstall
 
 build_script:
   - ps: |
-      Import-module .\tools\appveyor.psm1
+      Import-module .\tools\appveyorPhases.psm1
       Invoke-AppveyorBuild      
 
 # Artifacts would not be collected if build failed. To do that, we use on_finish:
@@ -19,7 +19,9 @@ on_finish:
   - ps: |
       ls .\out | % { Push-AppveyorArtifact $_.FullName }
 
+cache:
+  - C:\Users\appveyor\AppData\Local\NuGet\Cache
 test_script:
   - ps: |
-      Import-module .\tools\appveyor.psm1
+      Import-module .\tools\appveyorPhases.psm1
       Invoke-AppveyorTest
