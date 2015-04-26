@@ -69,7 +69,8 @@ Function Invoke-AppveyorTest
     # setup variables for the whole build process
     #
     #
-
+    Import-Module .\ConvertToHtml -force
+    
     foreach($moduleInfo in $moduleInfoList)
     {
         $ModuleName = $moduleInfo.ModuleName
