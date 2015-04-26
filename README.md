@@ -1,6 +1,9 @@
-[![Stories in Ready](https://badge.waffle.io/TravisEz13/ConvertToHtml.png?label=ready&title=Ready)](https://waffle.io/TravisEz13/ConvertToHtml)
 # ConvertToHtml
 PowerShell Module to convert PSObjects to formatted Html (targeted to Outlook)
+
+[![Build status](https://ci.appveyor.com/api/projects/status/j1vu2x67hxjmbtes/branch/master?svg=true)](https://ci.appveyor.com/project/TravisEz13/converttohtml/branch/master)
+
+[![Stories in Ready](https://badge.waffle.io/TravisEz13/ConvertToHtml.png?label=ready&title=Ready)](https://waffle.io/TravisEz13/ConvertToHtml)
 
 WMF/PowerShell 5 Installation
 --------------------------------
@@ -13,8 +16,6 @@ WMF/PowerShell 4 Installation
 -----------------------------
  1. Download nuget.exe from [NuGet.org](https://nuget.org/nuget.exe) 
  2. &nuget.exe install ConvertToHtml -source https://ci.appveyor.com/nuget/converttohtml -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion
-
-[![Build status](https://ci.appveyor.com/api/projects/status/j1vu2x67hxjmbtes/branch/master?svg=true)](https://ci.appveyor.com/project/TravisEz13/converttohtml/branch/master)
 
 Examples/Testing:
 -----------------
