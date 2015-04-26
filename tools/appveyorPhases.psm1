@@ -38,7 +38,6 @@ Function Invoke-AppveyorBuild
 
     foreach($moduleInfo in $moduleInfoList)
     {
-
         $ModuleName = $moduleInfo.ModuleName
         $ModulePath = $moduleInfo.ModulePath
         if(test-path $modulePath)
