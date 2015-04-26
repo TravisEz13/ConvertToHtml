@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/TravisEz13/ConvertToHtml.png?label=ready&title=Ready)](https://waffle.io/TravisEz13/ConvertToHtml)
 # ConvertToHtml
 PowerShell Module to convert PSObjects to formatted Html (targeted to Outlook)
 
