@@ -7,8 +7,12 @@ $repoName = ${env:APPVEYOR_REPO_NAME}
 $branchName = $env:APPVEYOR_REPO_BRANCH
 $pullRequestTitle = ${env:APPVEYOR_PULL_REQUEST_TITLE}
 
+$script:expectedModuleCount = 1
 $moduleInfoList = @()
 $moduleInfoList += New-BuildModuleInfo -ModuleName 'ConvertToHtml' -ModulePath '.\ConvertToHtml' -CodeCoverage @('.\ConvertToHtml\exporttohtml.psm1') -Tests @('.\tests')
+$script:moduleBuildCount = 0
+$script:failedTestsCount = 0
+$script:passedTestsCount = 0
 
 Function Invoke-AppveyorInstall
 {
@@ -34,6 +38,7 @@ Function Invoke-AppveyorBuild
 
     foreach($moduleInfo in $moduleInfoList)
     {
+
         $ModuleName = $moduleInfo.ModuleName
         $ModulePath = $moduleInfo.ModulePath
         if(test-path $modulePath)
@@ -47,6 +52,8 @@ Function Invoke-AppveyorBuild
 
             Write-Info 'Creating module zip ...'
             7z a -tzip ".\out\$ModuleName.zip" ".\$ModuleName\*.*"
+
+            $script:moduleBuildCount ++
         }
         else 
         {
@@ -61,7 +68,6 @@ Function Invoke-AppveyorTest
     Write-Info 'Starting Test stage...'
     # setup variables for the whole build process
     #
-    $script:failedTestsCount = 0
     #
 
     foreach($moduleInfo in $moduleInfoList)
@@ -75,7 +81,8 @@ Function Invoke-AppveyorTest
             $tests = $moduleInfo.Tests
             $tests | %{ 
                 $res = Invoke-RunTest -filePath $_ -CodeCoverage $CodeCoverage
-                $script:failedTestsCount += $res.FailedCount 
+                $script:failedTestsCount += $res.FailedCount
+                $script:passedTestsCount += $res.PassedCount 
                 $CodeCoverageTitle = 'Code Coverage {0:F1}%'  -f (100 * ($res.CodeCoverage.NumberOfCommandsExecuted /$res.CodeCoverage.NumberOfCommandsAnalyzed))
                 $res.CodeCoverage.MissedCommands | ConvertTo-FormattedHtml -title $CodeCoverageTitle | out-file .\out\CodeCoverage.html
             }
@@ -89,6 +96,14 @@ Function Invoke-AppveyorTest
     { 
         throw "$($script:failedTestsCount) tests failed."
     } 
+    elseif($script:passedTestsCount -eq 0)
+    {
+        throw "no tests passed"
+    }
+    elseif($script:moduleBuildCount -ne $script:expectedModuleCount)
+    {
+        throw "built ${script:moduleBuildCount} modules, but expected ${script:expectedModuleCount}"
+    }
     else 
     {       
         if($branchName -ieq 'master' -and [string]::IsNullOrEmpty($pullRequestTitle))
