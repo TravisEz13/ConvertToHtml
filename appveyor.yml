@@ -2,7 +2,7 @@ version: 1.0.0.{build}
 
 install:
   - ps: |
-      &nuget.exe install PoshBuildTools -source https://ci.appveyor.com/nuget/poshappveyor-odx6b5glnf32 -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion
+      &nuget.exe install PoshBuildTools -source https://ci.appveyor.com/nuget/PoshBuildTools -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion
       Import-module .\tools\appveyorPhases.psm1
       Invoke-AppveyorInstall
 
