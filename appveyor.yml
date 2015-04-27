@@ -10,16 +10,10 @@ install:
 
 build_script:
   - ps: |
-      Import-Module .\PoshBuildTools
       Invoke-AppveyorBuild -moduleInfoList $moduleInfoList      
-
-# Artifacts would not be collected if build failed. To do that, we use on_finish:
-#-artifacts:
-#  - path: nuget\*.nupkg
 
 on_finish:
   - ps: |
-      Import-Module .\PoshBuildTools
       Write-Info 'Creating Example zip ...'
       7z a -tzip .\out\examples.zip .\examples\*.html
       Invoke-AppveyorFinish -moduleInfoList $moduleInfoList -expectedModuleCount 1
@@ -29,5 +23,4 @@ cache:
 test_script:
   - ps: |
       Import-Module .\ConvertToHtml -force
-      Import-Module .\PoshBuildTools
       Invoke-AppveyorTest -moduleInfoList $moduleInfoList 
