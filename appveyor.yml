@@ -2,26 +2,25 @@ version: 1.0.0.{build}
 
 install:
   - ps: |
-      &nuget.exe install PoshBuildTools -source https://ci.appveyor.com/nuget/PoshBuildTools -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion -Version 1.0.0.37
-      Import-module .\tools\appveyorPhases.psm1
-      Invoke-AppveyorInstall
+      &nuget.exe install PoshBuildTools -source https://ci.appveyor.com/nuget/PoshBuildTools -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion -Version 1.0.0.48
+      Import-Module PoshBuildTools
+      $moduleInfoList = @()
+      $moduleInfoList += New-BuildModuleInfo -ModuleName 'ConvertToHtml' -ModulePath '.\ConvertToHtml' -CodeCoverage @('.\ConvertToHtml\exporttohtml.psm1') -Tests @('.\tests')
+      Invoke-AppveyorInstall -InstallPester
 
 build_script:
   - ps: |
-      Import-module .\tools\appveyorPhases.psm1
-      Invoke-AppveyorBuild      
-
-# Artifacts would not be collected if build failed. To do that, we use on_finish:
-#-artifacts:
-#  - path: nuget\*.nupkg
+      Invoke-AppveyorBuild -moduleInfoList $moduleInfoList      
 
 on_finish:
   - ps: |
-      ls .\out | % { Push-AppveyorArtifact $_.FullName }
+      Write-Info 'Creating Example zip ...'
+      7z a -tzip .\out\examples.zip .\examples\*.html
+      Invoke-AppveyorFinish -moduleInfoList $moduleInfoList -expectedModuleCount 1
 
 cache:
   - C:\Users\appveyor\AppData\Local\NuGet\Cache
 test_script:
   - ps: |
-      Import-module .\tools\appveyorPhases.psm1
-      Invoke-AppveyorTest
+      Import-Module .\ConvertToHtml -force
+      Invoke-AppveyorTest -moduleInfoList $moduleInfoList 
