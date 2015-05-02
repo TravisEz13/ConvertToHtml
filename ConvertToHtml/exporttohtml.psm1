@@ -20,11 +20,14 @@ function ConvertTo-FormattedHtml
     Begin
     {
         [PSObject[]] $allInput = @();
+        [HashTable] $exportHtmlParams = @{
+                bodyOnly = $bodyOnly
+                Heading  = $Title
+            }
     }
 
     process
     {
-        [HashTable] $exportHtmlParams = @{bodyOnly = $bodyOnly}
         foreach($item in $InputObject)
         {
             $allInput += $item;
@@ -73,7 +76,7 @@ function ConvertTo-FormattedHtml
             {
                 Write-Verbose -Message 'Json missing, using properites...'
 
-                [string] $result = Export-Html -InputObject $allInput -Property (Get-InputProperty -allInput $allInput) -Heading $title @exportHtmlParams
+                [string] $result = Export-Html -InputObject $allInput -Property (Get-InputProperty -allInput $allInput) @exportHtmlParams
                 if($OutClipboard)
                    {
                         $result | Out-Clipboard
