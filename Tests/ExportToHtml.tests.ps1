@@ -218,6 +218,16 @@ try
             (Find-FormatJsonFromFile -allInput $objects) | should be (get-content -raw -path "$PSScriptRoot\..\ConvertToHtml\ExportHtml.System.Diagnostics.Process.Json")
         }
     }
+    Describe 'ConvertTo-FormattedHtml' {
+        $property = @{foo='bar'; foo2='bar2'}
+        $objects2 = New-Object -TypeName PSCustomObject -property $property 
+        $objects = get-process | select -first 2
+        $title = 'foo1029384'
+        It 'Should contain Title' {
+            $objects | ConvertTo-FormattedHtml -Title $title | should match "<h1>$title</h1>"
+            $objects2 | ConvertTo-FormattedHtml -Title $title | should match "<h1>$title</h1>"
+        }
+    }    
     Describe 'Convert-FormatObjectJson for an existing json' {
         $formatJsonString = (get-content -raw -path "$PSScriptRoot\..\ConvertToHtml\ExportHtml.System.Diagnostics.Process.Json")
         $propertyCount = 8
