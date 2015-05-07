@@ -2,7 +2,7 @@ version: 1.0.0.{build}
 
 install:
   - ps: |
-      &nuget.exe install PoshBuildTools -source https://ci.appveyor.com/nuget/PoshBuildTools -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion -Version 1.0.0.48
+      &nuget.exe install PoshBuildTools -source https://ci.appveyor.com/nuget/PoshBuildTools -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion -Version 1.0.0.85
       Import-Module PoshBuildTools
       $moduleInfoList = @()
       $moduleInfoList += New-BuildModuleInfo -ModuleName 'ConvertToHtml' -ModulePath '.\ConvertToHtml' -CodeCoverage @('.\ConvertToHtml\exporttohtml.psm1') -Tests @('.\tests')
