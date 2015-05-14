@@ -1,10 +1,9 @@
 # ConvertToHtml
 
-[![Join the chat at https://gitter.im/TravisEz13/ConvertToHtml](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/TravisEz13/ConvertToHtml?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 PowerShell Module to convert PSObjects to formatted Html (targeted to Outlook)
 
+[![Join the chat at https://gitter.im/TravisEz13/ConvertToHtml](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/TravisEz13/ConvertToHtml?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build status](https://ci.appveyor.com/api/projects/status/j1vu2x67hxjmbtes/branch/master?svg=true)](https://ci.appveyor.com/project/TravisEz13/converttohtml/branch/master)
-
 [![Stories in Ready](https://badge.waffle.io/TravisEz13/ConvertToHtml.png?label=ready&title=Ready)](https://waffle.io/TravisEz13/ConvertToHtml)
 
 WMF/PowerShell 5 Installation
