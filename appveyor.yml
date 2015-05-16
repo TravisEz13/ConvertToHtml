@@ -4,7 +4,8 @@ install:
   - ps: |
       &nuget.exe install PoshBuildTools -source https://ci.appveyor.com/nuget/PoshBuildTools -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion -Version 1.0.0.130
       Import-Module PoshBuildTools
-      $moduleInfoList = New-BuildModuleInfo 
+      $moduleInfoList = New-BuildModuleInfo -Auto
+      Write-verboseBuildModuleInfo -moduleInfoList $moduleInfoList
       Invoke-AppveyorInstall -skipConvertToHtmlInstall
 
 build_script:
