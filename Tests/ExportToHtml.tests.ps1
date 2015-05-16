@@ -162,7 +162,7 @@ try
         }
     } 
 
-    Describe2 'New-FormattedHtmlJson' {
+    Describe 'New-FormattedHtmlJson' {
         It 'should not throw' {
             {New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'} | New-FormattedHtmlJson | ConvertFrom-Json} | should not throw 
         }
