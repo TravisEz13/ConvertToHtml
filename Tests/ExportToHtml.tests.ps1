@@ -160,7 +160,7 @@ try
         It "property Names should match" {
             (Get-InputProperty -allInput (New-Object -TypeName PSObject -property @{foo='bar'; foo2='bar2'})) | should be @('foo','foo2')
         }
-    }
+    } 
 
     Describe 'New-FormattedHtmlJson' {
         It 'should not throw' {
