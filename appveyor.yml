@@ -1,6 +1,5 @@
 version: 1.0.0.{build}
-environment:
-  os: Unstable
+os: Visual Studio 2015
 install:
   - ps: |
       Write-verbose -Message "PSVersion: $($PSVersionTable.PSVersion.Major)" -Verbose
