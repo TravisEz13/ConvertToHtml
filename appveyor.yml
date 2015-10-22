@@ -1,7 +1,9 @@
 version: 1.0.0.{build}
-
+environment:
+  os: Visual Studio 2015
 install:
   - ps: |
+      Write-verbose -Message "PSVersion: $($PSVersionTable.PSVersion.Major)" -Verbose
       &nuget.exe install PoshBuildTools -source https://ci.appveyor.com/nuget/PoshBuildTools -outputDirectory "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\" -ExcludeVersion -Version 1.0.0.130
       Import-Module PoshBuildTools
       $moduleInfoList = New-BuildModuleInfo -Auto
