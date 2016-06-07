@@ -1,4 +1,4 @@
-[string] $moduleDir = Split-Path -Path $script:MyInvocation.MyCommand.Path –Parent
+[string] $moduleDir = Split-Path -Path $script:MyInvocation.MyCommand.Path -Parent
 
 Set-StrictMode -Version latest
 
@@ -232,7 +232,7 @@ function New-FormattedHtmlJson
                         'AllowHtml' = $AllowHtml
                     }
 
-                    [PSObject] $jsonObject = New-Object –TypeName PSObject –Prop $jsonProperties 
+                    [PSObject] $jsonObject = New-Object -TypeName PSObject -Prop $jsonProperties 
                     $jsonObject.PSObject.TypeNames[0] = 'Export.Html.Format'
                     #[string] $filename="ExportHtml.$thisTypeName.Json"
                     $jsonObject | ConvertTo-Json | Write-Output
