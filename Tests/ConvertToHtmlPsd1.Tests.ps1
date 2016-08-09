@@ -36,7 +36,7 @@ try
             }
             $error.Count | should be 0
         }
-        It 'should retain errors'{
+        It 'should retain errors' -skip:($null -ne $env:AppVeyor) {
             $error.Clear()
             Write-Error 'foo' -ErrorAction Continue 2> $null
             {Import-Module "$PSScriptRoot\..\ConvertToHtml" -Force} | should not throw
