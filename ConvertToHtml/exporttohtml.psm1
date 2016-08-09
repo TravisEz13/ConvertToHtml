@@ -168,6 +168,7 @@ function Find-FormatJsonFromFile
     
     [int] $i = 0
     [string] $typenameFormatFilePath = $null
+    Write-Verbose "type count: $($allInput[0].PSObject.TypeNames.Count)"
     do{
         $tempPath = (Join-Path -Path $moduleDir -ChildPath ('ExportHtml.' + $allInput[0].PSObject.TypeNames[$i] + '.json'))
         Write-Verbose -Message "looking for $tempPath"
@@ -179,7 +180,9 @@ function Find-FormatJsonFromFile
         }
         $i++
     }
-    while($i -lt $allInput[0].PSObject.TypeNames.Count -and $null -eq $typenameFormatFilePath)
+    while($i -lt $allInput[0].PSObject.TypeNames.Count -and !$typenameFormatFilePath)
+    Write-Verbose "count test: $($i -lt $allInput[0].PSObject.TypeNames.Count)"
+    Write-Verbose "result test: $($null -eq $typenameFormatFilePath)"
     return $null
 }
 
@@ -543,66 +546,82 @@ function Out-Browser
     }
 }
 
-Add-Type -Assembly @('PresentationCore')
-
-<#
-.Synopsis
-    Puts HTML on the clipboard
-#>
-function Out-Clipboard
+$pcLoaded = $false 
+$OriginalErrorCount = $global:Error.Count
+try 
 {
-    param ( 
-    [parameter(Mandatory=$true,ValueFromPipeline=$true)]
-    [string] $InputObject,
-    [Windows.TextDataFormat] $format=[Windows.TextDataFormat]::Html
-    )
-
-    Begin
+    Add-Type -Assembly @('PresentationCore') 2> $null
+    $pcLoaded = $true
+}
+catch
+{
+    Write-Verbose "PresentationCore failed to load"
+    if($OriginalErrorCount -eq 0)
     {
-        [System.Text.StringBuilder] $sb = New-Object -TypeName 'System.Text.StringBuilder' 
+        $global:Error.Clear()
     }
-    Process
-    {
-        $sb.Append($InputObject) > $null
-    }
-    End
-    {
-        Write-Verbose -Message 'Sending to clipboard...'
-        [string] $body = $sb.ToString()
-        [string] $cfHtml=Get-CF_Html -html $body
-        Clear-Clipboard
-
-        $cfHtml|powershell.exe -NoProfile -STA -Command {
-            Add-Type -Assembly PresentationCore
-
-            $clipText = ($input | Out-String -Stream)
- 
-            ## And finally set the clipboard text
-            #[Windows.Clipboard]::SetText($input,[Windows.TextDataFormat]::UnicodeText)
-            #Write-Host $clipText
-            [Windows.Clipboard]::SetText($clipText, [Windows.TextDataFormat]::Html)
-        }
-    }
-
 }
 
-
-<#
-.Synopsis
-    Converts HTML to the text expected on the clipboard
-#>
-function Get-CF_Html
-{
-    param(
+if($pcLoaded){
+    <#
+    .Synopsis
+        Puts HTML on the clipboard
+    #>
+    function Out-Clipboard
+    {
+        param ( 
         [parameter(Mandatory=$true,ValueFromPipeline=$true)]
-        [string]
-        $html
-    )
+        [string] $InputObject,
+        [Windows.TextDataFormat] $format=[Windows.TextDataFormat]::Html
+        )
 
-    #adding for script analyzer
-    Write-Verbose -Message 'in get-cf_html'
+        Begin
+        {
+            [System.Text.StringBuilder] $sb = New-Object -TypeName 'System.Text.StringBuilder' 
+        }
+        Process
+        {
+            $sb.Append($InputObject) > $null
+        }
+        End
+        {
+            Write-Verbose -Message 'Sending to clipboard...'
+            [string] $body = $sb.ToString()
+            [string] $cfHtml=Get-CF_Html -html $body
+            Clear-Clipboard
 
-    [string] $cfHtmlFormat = @"
+            $cfHtml|powershell.exe -NoProfile -STA -Command {
+                Add-Type -Assembly PresentationCore
+
+                $clipText = ($input | Out-String -Stream)
+    
+                ## And finally set the clipboard text
+                #[Windows.Clipboard]::SetText($input,[Windows.TextDataFormat]::UnicodeText)
+                #Write-Host $clipText
+                [Windows.Clipboard]::SetText($clipText, [Windows.TextDataFormat]::Html)
+            }
+        }
+
+    }
+
+
+
+    <#
+    .Synopsis
+        Converts HTML to the text expected on the clipboard
+    #>
+    function Get-CF_Html
+    {
+        param(
+            [parameter(Mandatory=$true,ValueFromPipeline=$true)]
+            [string]
+            $html
+        )
+
+        #adding for script analyzer
+        Write-Verbose -Message 'in get-cf_html'
+
+        [string] $cfHtmlFormat = @"
 Version:{0}
 StartHTML:{1}
 EndHTML:{2}
@@ -610,24 +629,25 @@ StartFragment:{3}
 EndFragment:{4}
 {5}
 "@
-    # Make sure header is 89 characters
-    $totalLengthOfFields = 6
+        # Make sure header is 89 characters
+        $totalLengthOfFields = 6
 
-    $headerLength = 57 + 3 + ($totalLengthOfFields * 4)
-    $startHtml = $headerLength 
-    $startHtmlString = Format-Number -totalLength $totalLengthOfFields -value $startHtml
+        $headerLength = 57 + 3 + ($totalLengthOfFields * 4)
+        $startHtml = $headerLength 
+        $startHtmlString = Format-Number -totalLength $totalLengthOfFields -value $startHtml
 
-    $startFragment= Format-Number -totalLength $totalLengthOfFields -value $startHtml
-    #$startSelection = Format-Number -totalLength $totalLengthOfFields -value $startHtml
-    $endHtmlPosition = $startHtml + $html.Length
-    $endHtml = Format-Number -totalLength $totalLengthOfFields -value $endHtmlPosition
-    $endFragment = Format-Number -totalLength $totalLengthOfFields -value $endHtmlPosition
-    #$endSelection = Format-Number -totalLength $totalLengthOfFields -value $endHtmlPosition
+        $startFragment= Format-Number -totalLength $totalLengthOfFields -value $startHtml
+        #$startSelection = Format-Number -totalLength $totalLengthOfFields -value $startHtml
+        $endHtmlPosition = $startHtml + $html.Length
+        $endHtml = Format-Number -totalLength $totalLengthOfFields -value $endHtmlPosition
+        $endFragment = Format-Number -totalLength $totalLengthOfFields -value $endHtmlPosition
+        #$endSelection = Format-Number -totalLength $totalLengthOfFields -value $endHtmlPosition
 
-    $cfHtml=[String]::Format($cfHtmlFormat,'0.9',$startHtmlString,$endHtml,$startFragment,$endFragment,$html)
+        $cfHtml=[String]::Format($cfHtmlFormat,'0.9',$startHtmlString,$endHtml,$startFragment,$endFragment,$html)
 
-    Write-Debug $cfHtml
-    $cfHtml | Write-Output 
+        Write-Debug $cfHtml
+        $cfHtml | Write-Output 
+    }
 }
 
 

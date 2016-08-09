@@ -91,6 +91,7 @@ try
             }
     }
 
+    $getCfHtmlItParams = @{skip = ($null -eq (get-command -Name Get-CF_Html -ErrorAction SilentlyContinue))}
     Describe 'Get-CF_Html' {
         BeforeEach {
             Suite.BeforeEach
@@ -100,51 +101,56 @@ try
         }
 
         $headerLength = 84
+        $script:end = 87
+        $script:html=''
+        it 'should not throw' @getCfHtmlItParams {
+            
 
-        $html = 'foo'
-        $result = (Get-CF_Html -html $html)
-        [Byte[]] $buffer = [System.Text.UnicodeEncoding]::Unicode.GetBytes($result)
-        $memStream = New-Object -TypeName 'System.IO.MemoryStream' 
-        $memStream.Write($buffer, 0, $buffer.length)
-        $memStream.Position = 0
-        $lines=@()
-        try {
-            $streamReader = New-Object -TypeName 'System.IO.StreamReader' -ArgumentList @($memStream, [System.Text.UnicodeEncoding]::Unicode)
-            while(!$streamReader.EndOfStream)
+            $script:html = 'foo'
+            {$script:result = (Get-CF_Html -html $script:html)} | should not throw
+            [Byte[]] $buffer = [System.Text.UnicodeEncoding]::Unicode.GetBytes($script:result)
+            $memStream = New-Object -TypeName 'System.IO.MemoryStream' 
+            $memStream.Write($buffer, 0, $buffer.length)
+            $memStream.Position = 0
+            $script:lines=@()
+            try {
+                $streamReader = New-Object -TypeName 'System.IO.StreamReader' -ArgumentList @($memStream, [System.Text.UnicodeEncoding]::Unicode)
+                while(!$streamReader.EndOfStream)
+                {
+                    $script:lines += $streamReader.ReadLine()
+                }
+            }
+            finally
             {
-                $lines += $streamReader.ReadLine()
+                $memStream.Close()
             }
-        }
-        finally
-        {
-            $memStream.Close()
+
+            $script:end = $headerLength + $script:html.length
         }
 
-        $end = $headerLength + $html.length
-
-            It "Should not be longer than end length" {
-                $result.length | should be $end
+            It "Should not be longer than end length" @getCfHtmlItParams {
+                $script:result.length | should be $script:end
             }
-            It "Should add header of length $headerLength"{
-                ($result.length - $html.length) | should be $headerLength
+            It "Should add header of length $headerLength" @getCfHtmlItParams {
+                ($script:result.length - $script:html.length) | should be $headerLength
             }
-        It 'First Header line should be version 0.9'{
-            $lines[0] | should be "Version:0.9"
+        It 'First Header line should be version 0.9' @getCfHtmlItParams {
+            $script:lines[0] | should be "Version:0.9"
         }
-        It "Second header line should be StartHTML:0000$headerLength"{
-            $lines[1] | should be "StartHTML:0000$headerLength"
+        It "Second header line should be StartHTML:0000$headerLength" @getCfHtmlItParams {
+            $script:lines[1] | should be "StartHTML:0000$headerLength"
         }
-        It "Third header line should be EndHTML:0000$end"{
-            $lines[2] | should be "EndHTML:0000$end"
+        It "Third header line should be EndHTML:0000$end" @getCfHtmlItParams {
+            $script:lines[2] | should be "EndHTML:0000$end"
         }
-        It "Forth Header line should be StartFragment:0000$headerLength"{
-            $lines[3] | should be "StartFragment:0000$headerLength"
+        It "Forth Header line should be StartFragment:0000$headerLength" @getCfHtmlItParams {
+            $script:lines[3] | should be "StartFragment:0000$headerLength"
         }
-        It "Fifth header line should be EndFragment:0000$end"{
-            $lines[4] | should be "EndFragment:0000$end"
+        It "Fifth header line should be EndFragment:0000$end" @getCfHtmlItParams {
+            $script:lines[4] | should be "EndFragment:0000$end"
         }
-        It "Should contain html fragment" {
-            $result.EndsWith($html) | should be $true
+        It "Should contain html fragment" @getCfHtmlItParams {
+            $script:result.EndsWith($html) | should be $true
         }
     }
 
@@ -214,7 +220,8 @@ try
         }
         It 'Should return module json for Process Type' {
             $objects = get-process
-            (Find-FormatJsonFromFile -allInput $objects).length | should be (get-content -raw -path "$PSScriptRoot\..\ConvertToHtml\ExportHtml.System.Diagnostics.Process.Json").length
+            $objects[0].GetType().FullName | should be 'System.Diagnostics.Process'
+            #(Find-FormatJsonFromFile -allInput $objects).length | should be (get-content -raw -path "$PSScriptRoot\..\ConvertToHtml\ExportHtml.System.Diagnostics.Process.Json").length
             (Find-FormatJsonFromFile -allInput $objects) | should be (get-content -raw -path "$PSScriptRoot\..\ConvertToHtml\ExportHtml.System.Diagnostics.Process.Json")
         }
     }

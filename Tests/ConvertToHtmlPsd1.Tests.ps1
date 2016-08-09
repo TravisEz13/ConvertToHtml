@@ -30,7 +30,17 @@ try
         It 'should not throw or have an error'{
             $error.Clear()
             {Import-Module "$PSScriptRoot\..\ConvertToHtml" -Force} | should not throw
+            foreach($errorInstance in $error)
+            {
+                $errorInstance | Out-String | should be $null
+            }
             $error.Count | should be 0
+        }
+        It 'should retain errors' -skip:($null -ne $env:AppVeyor) {
+            $error.Clear()
+            Write-Error 'foo' -ErrorAction Continue 2> $null
+            {Import-Module "$PSScriptRoot\..\ConvertToHtml" -Force} | should not throw
+            $error[-1].exception.message | should be 'foo'
         }
     }
 }
