@@ -40,7 +40,7 @@ try
             $error.Clear()
             Write-Error 'foo' -ErrorAction Continue 2> $null
             {Import-Module "$PSScriptRoot\..\ConvertToHtml" -Force} | should not throw
-            $error[-1].exception.message | should be 'foo'
+            $error[$error.Count -1].exception.message | should be 'foo'
         }
     }
 }
