@@ -8,7 +8,7 @@ PowerShell Module to convert PSObjects to formatted Html (targeted to Outlook)
 [![codecov.io](http://codecov.io/github/TravisEz13/ConvertToHtml/coverage.svg?branch=master)](http://codecov.io/github/TravisEz13/ConvertToHtml?branch=master)
 
 [![codecov.io](http://codecov.io/github/TravisEz13/ConvertToHtml/branch.svg?branch=master)](http://codecov.io/github/TravisEz13/ConvertToHtml?branch=master)
-WMF/PowerShell 5 Installation
+WMF/PowerShell 5 Installation 
 --------------------------------
 From PowerShell run:
 
