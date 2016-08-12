@@ -1,4 +1,4 @@
-[string] $moduleDir = Split-Path -Path $script:MyInvocation.MyCommand.Path -Parent
+[string] $moduleDir = $PSScriptRoot
 
 Set-StrictMode -Version latest
 
