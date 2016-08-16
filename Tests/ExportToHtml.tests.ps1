@@ -343,6 +343,47 @@ try
             $linkObj | ConvertTo-FormattedHtml -bodyOnly | should not match $link
         }
     }
+
+    Describe 'Clear-Clipboard' {
+        if(!$env:Appveyor){
+            Set-Clipboard -Value "test"
+        }
+
+        it "Should Clear-Clipboard" -Skip:($null -ne $env:AppVeyor) {
+            {Clear-Clipboard} | should not throw
+            Get-Clipboard | should benullorempty
+        }
+    }
+
+    Describe 'Out-Clipboard' {
+        if(!$env:Appveyor){
+            Set-Clipboard -Value " "
+        }
+
+        it "Should set clipboard" -Skip:($null -ne $env:AppVeyor) {
+            $testHtml = "<b>test</b>" 
+            {$testHtml | out-clipboard} | should not throw
+            $clipboard = [Windows.Clipboard]::GetDataObject()
+            $formats = $clipboard.GetFormats()
+            $formats | should be 'HTML Format'
+            $clipboardHtmlFragment = Get-CF_Html -html  $testHtml
+            $clipboard.GetData($formats) | should be $clipboardHtmlFragment
+            #Get-Clipboard -Format Text | should be "test"
+        }
+    }
+
+    Describe 'Out-Browser' {
+        Mock -CommandName Start-Process -ModuleName ExportToHtml -MockWith {} -ParameterFilter {$FilePath -eq 'cmd.exe'} -Verifiable
+        Mock -CommandName Out-File -ModuleName ExportToHtml -MockWith {$InputObject | Out-File -FilePath TestDrive:\outbrowser.txt}  -Verifiable -ParameterFilter {$Filepath -notlike "TestDrive:\*"}
+
+        it "Should start Browser" {
+            $testHtml = "<b>test</b>" 
+            {$testHtml | out-browser} | should not throw
+            cat TestDrive:\outbrowser.txt | should be "<b>test</b>" 
+            Assert-VerifiableMocks 
+        }
+    }
+
 }
 finally
 {
