@@ -345,17 +345,22 @@ try
     }
 
     Describe 'Clear-Clipboard' {
-        Set-Clipboard -Value "test"
-        it "Should Clear-Clipboard" {
+        if(!$env:Appveyor){
+            Set-Clipboard -Value "test"
+        }
+
+        it "Should Clear-Clipboard" -Skip:($env:AppVeyor) {
             {Clear-Clipboard} | should not throw
             Get-Clipboard | should benullorempty
         }
     }
 
     Describe 'Out-Clipboard' {
-        Set-Clipboard -Value " "
+        if(!$env:Appveyor){
+            Set-Clipboard -Value " "
+        }
 
-        it "Should set clipboard" {
+        it "Should set clipboard" -Skip:($env:AppVeyor) {
             $testHtml = "<b>test</b>" 
             {$testHtml | out-clipboard} | should not throw
             $clipboard = [Windows.Clipboard]::GetDataObject()
