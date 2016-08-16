@@ -585,10 +585,10 @@ if($pcLoaded){
         }
         End
         {
+            Clear-Clipboard
             Write-Verbose -Message 'Sending to clipboard...'
             [string] $body = $sb.ToString()
             [string] $cfHtml=Get-CF_Html -html $body
-            Clear-Clipboard
 
             $cfHtml|powershell.exe -NoProfile -STA -Command {
                 Add-Type -Assembly PresentationCore
@@ -599,6 +599,7 @@ if($pcLoaded){
                 #[Windows.Clipboard]::SetText($input,[Windows.TextDataFormat]::UnicodeText)
                 #Write-Host $clipText
                 [Windows.Clipboard]::SetText($clipText, [Windows.TextDataFormat]::Html)
+                #[Windows.Clipboard]::SetText($InputObject, [Windows.TextDataFormat]::Text)
             }
         }
 
